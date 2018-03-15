@@ -1,0 +1,40 @@
+PATH
+  remote: .
+  specs:
+    mock_redis_lua_extension (0.1.0)
+      mock_redis
+      rufus-lua
+
+GEM
+  remote: http://rubygems.org/
+  specs:
+    diff-lcs (1.3)
+    ffi (1.9.23)
+    mock_redis (0.17.3)
+    rake (11.3.0)
+    rspec (3.7.0)
+      rspec-core (~> 3.7.0)
+      rspec-expectations (~> 3.7.0)
+      rspec-mocks (~> 3.7.0)
+    rspec-core (3.7.1)
+      rspec-support (~> 3.7.0)
+    rspec-expectations (3.7.0)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.7.0)
+    rspec-mocks (3.7.0)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.7.0)
+    rspec-support (3.7.1)
+    rufus-lua (1.1.4)
+      ffi (~> 1.9)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  mock_redis_lua_extension!
+  rake (>= 10, < 12)
+  rspec (~> 3.0)
+
+BUNDLED WITH
+   1.12.5
