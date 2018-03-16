@@ -78,8 +78,6 @@ module MockRedisLuaExtension
     case arg
     when nil
       false
-    when 'OK'
-      {'ok' => 'OK'}
     when Integer, String
       arg
     else
@@ -105,13 +103,9 @@ module MockRedisLuaExtension
   end
 
   def table_to_array_or_status(table)
-    if table.keys.length == 1 && (table['ok'] || table['err'])
-      table.values.first
-    else
-      (1...table.keys.length).map do |i|
-        marshal_lua_return_to_ruby(table[i.to_f])
-      end.compact
-    end
+    (1..table.keys.length).map do |i|
+      marshal_lua_return_to_ruby(table[i.to_f])
+    end.compact
   end
 
   def valid_lua_bound_cmds
