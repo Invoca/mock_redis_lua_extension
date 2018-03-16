@@ -2,6 +2,7 @@ require 'rufus-lua'
 
 module MockRedisLuaExtension
   class InvalidCommand < StandardError; end
+  class InvalidDataType < StandardError; end
 
   def self.wrap(instance)
     if !instance.respond_to?(:mock_redis_lua_extension_enabled) && is_a_mock?(instance)
@@ -15,7 +16,7 @@ module MockRedisLuaExtension
   end
 
   def self.is_a_mock?(instance)
-    instance.class.ancestors.any? { |a| a.to_s == "MockRedis" }
+    instance.class.ancestors.any? { |a| a.to_s == 'MockRedis' }
   end
 
   def mock_redis_lua_extension_enabled
@@ -29,7 +30,7 @@ module MockRedisLuaExtension
     lua_state.function 'redis.call' do |cmd, *args|
       lua_bound_redis_call(cmd, *args)
     end
-    lua_state.eval(script)
+    marshal_lua_return_to_ruby(lua_state.eval(script))
   end
 
   private
@@ -64,25 +65,52 @@ module MockRedisLuaExtension
     args.map do |arg|
       case arg
         when Float, Integer
-          arg.to_i.to_s
-        when true
-          '1'
-        when false
-          nil
-        else
+          arg.to_s
+        when String
           arg
+        else
+          raise InvalidDataType, "Lua redis() command arguments must be strings or integers (was: #{args.inspect})"
       end
     end
   end
 
   def marshal_redis_result_to_lua(arg)
     case arg
-      when nil
-        false
-      when Integer
-        arg.to_s
-      else
-        arg
+    when nil
+      false
+    when 'OK'
+      {'ok' => 'OK'}
+    when Integer, String
+      arg
+    else
+      raise InvalidDataType, "Unsupported type returned from redis (was: #{arg.inspect})"
+    end
+  end
+
+  def marshal_lua_return_to_ruby(arg)
+    case arg
+    when false
+      nil
+    when true
+      1
+    when Float, Integer
+      arg.to_i
+    when String, Array, nil
+      arg
+    when Rufus::Lua::Table
+      table_to_array_or_status(arg)
+    else
+      raise InvalidDataType, "Unsupported type returned from script (was: #{arg.inspect})"
+    end
+  end
+
+  def table_to_array_or_status(table)
+    if table.keys.length == 1 && (table['ok'] || table['err'])
+      table.values.first
+    else
+      (1...table.keys.length).map do |i|
+        marshal_lua_return_to_ruby(table[i.to_f])
+      end.compact
     end
   end
 
