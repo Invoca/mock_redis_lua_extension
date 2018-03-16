@@ -1,7 +1,6 @@
 require 'spec_helper'
 require 'mock_redis_lua_extension'
 require 'mock_redis'
-require 'pry'
 
 RSpec.describe MockRedisLuaExtension, '' do
   context 'extends a MockRedis instance' do
