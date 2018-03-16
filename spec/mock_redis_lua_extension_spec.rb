@@ -1,11 +1,21 @@
 require 'spec_helper'
 require 'mock_redis_lua_extension'
 require 'mock_redis'
+require 'pry'
 
 RSpec.describe MockRedisLuaExtension, '' do
   context 'extends a MockRedis instance' do
     before do
       @redis = MockRedisLuaExtension.wrap(MockRedis.new)
+    end
+
+    it 'should add a method indicating that the MockRedis has been extended' do
+      expect(@redis.respond_to?(:mock_redis_lua_extension_enabled)).to eq(true)
+    end
+
+    it 'should raise an ArgumentError when attempting to wrap an object that is not a MockRedis' do
+      expect { MockRedisLuaExtension.wrap(Object.new) }.to raise_error(ArgumentError,
+                                                                       'Can only wrap MockRedis instances')
     end
 
     it 'supports eval with keys' do

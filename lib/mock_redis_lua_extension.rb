@@ -4,10 +4,12 @@ module MockRedisLuaExtension
   class InvalidCommand < StandardError; end
 
   def self.wrap(instance)
-    if !instance.respond_to?(:lua_bound_redis_call) && is_a_mock?(instance)
+    if !instance.respond_to?(:mock_redis_lua_extension_enabled) && is_a_mock?(instance)
       class << instance
         prepend(MockRedisLuaExtension)
       end
+    elsif !is_a_mock?(instance)
+      raise ArgumentError, 'Can only wrap MockRedis instances'
     end
     instance
   end
@@ -16,13 +18,8 @@ module MockRedisLuaExtension
     instance.class.ancestors.any? { |a| a.to_s == "MockRedis" }
   end
 
-  def lua_bound_redis_call(cmd, *args)
-    cmd = cmd.downcase
-    if valid_lua_bound_cmds.include?(cmd.to_sym)
-      exec_redis_cmd(cmd, *args)
-    else
-      raise InvalidCommand, "Invalid command (cmd: #{cmd}, args: #{args.inspect})"
-    end
+  def mock_redis_lua_extension_enabled
+    true
   end
 
   def eval(script, keys: nil, argv: nil)
@@ -36,6 +33,15 @@ module MockRedisLuaExtension
   end
 
   private
+
+  def lua_bound_redis_call(cmd, *args)
+    cmd = cmd.downcase
+    if valid_lua_bound_cmds.include?(cmd.to_sym)
+      exec_redis_cmd(cmd, *args)
+    else
+      raise InvalidCommand, "Invalid command (cmd: #{cmd}, args: #{args.inspect})"
+    end
+  end
 
   def setup_keys_and_argv(lua_state, keys, argv)
     keys = [] unless keys
