@@ -22,9 +22,9 @@ module MockRedisLuaExtension
     true
   end
 
-  def eval(script, keys: nil, argv: nil)
+  def eval(script, keys=nil, argv=nil, **args)
     lua_state = Rufus::Lua::State.new
-    setup_keys_and_argv(lua_state, keys, argv)
+    setup_keys_and_argv(lua_state, keys, argv, args)
 
     lua_state.function 'redis.call' do |cmd, *args|
       lua_bound_redis_call(cmd, *args)
@@ -37,23 +37,24 @@ module MockRedisLuaExtension
   def lua_bound_redis_call(cmd, *args)
     cmd = cmd.downcase
     if valid_lua_bound_cmds.include?(cmd.to_sym)
-      exec_redis_cmd(cmd, *args)
+      redis_call_from_lua(cmd, *args)
     else
       raise InvalidCommand, "Invalid command (cmd: #{cmd}, args: #{args.inspect})"
     end
   end
 
-  def setup_keys_and_argv(lua_state, keys, argv)
+  def setup_keys_and_argv(lua_state, keys, argv, args)
     keys = [] unless keys
-    argv = [] unless argv
-    keys.all? { |k| k.is_a?(String) } or raise ArgumentError, "Keys must be strings (was #{keys.inspect})"
-    argv.all? { |a| a.is_a?(String) || a.is_a?(Integer) } or raise ArgumentError, "Argv values must be strings (was #{argv.inspect}"
+    keys = args[:keys] if args[:keys]
 
-    lua_state['KEYS'] = keys
+    argv = [] unless argv
+    argv = args[:argv] if args[:argv]
+
+    lua_state['KEYS'] = keys.map { |k| k.to_s }
     lua_state['ARGV'] = argv.map { |a| a.to_s }
   end
 
-  def exec_redis_cmd(cmd, *args)
+  def redis_call_from_lua(cmd, *args)
     redis_args = marshal_lua_args_to_redis(args)
     redis_result = self.send(cmd, *redis_args)
     marshal_redis_result_to_lua(redis_result)

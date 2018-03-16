@@ -21,11 +21,25 @@ RSpec.describe MockRedisLuaExtension, '' do
     it 'supports eval with keys' do
       result = @redis.eval('return KEYS[1]', keys: ['first_key', 'second_key'])
       expect(result).to eq('first_key')
+
+      result = @redis.eval('return KEYS[2]', ['first_key', 'second_key'])
+      expect(result).to eq('second_key')
     end
 
     it 'supports eval with argv' do
       result = @redis.eval('return ARGV[1]', argv: ['first', 'second'])
       expect(result).to eq('first')
+
+      result = @redis.eval('return ARGV[2]', [], ['first', 'second'])
+      expect(result).to eq('second')
+    end
+
+    it 'should convert keys and argv to lists of strings' do
+      result = @redis.eval('return ARGV[2]', argv: [nil, 2.4])
+      expect(result).to eq('2.4')
+
+      result = @redis.eval('return KEYS[1]', keys: [:stuff])
+      expect(result).to eq('stuff')
     end
 
     it 'supports eval with redis bound to self' do
