@@ -2,10 +2,10 @@ require 'spec_helper'
 require 'mock_redis_lua_extension'
 require 'mock_redis'
 
-RSpec.describe MockRedisExtension, '' do
+RSpec.describe MockRedisLuaExtension, '' do
   context 'extends a MockRedis instance' do
     before do
-      @redis = MockRedisExtension.wrap(MockRedis.new)
+      @redis = MockRedisLuaExtension.wrap(MockRedis.new)
     end
 
     it 'supports eval with keys' do

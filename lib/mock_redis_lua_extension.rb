@@ -1,12 +1,12 @@
 require 'rufus-lua'
 
-module MockRedisExtension
+module MockRedisLuaExtension
   class InvalidCommand < StandardError; end
 
   def self.wrap(instance)
     if !instance.respond_to?(:lua_bound_redis_call) && is_a_mock?(instance)
       class << instance
-        prepend(MockRedisExtension)
+        prepend(MockRedisLuaExtension)
       end
     end
     instance
