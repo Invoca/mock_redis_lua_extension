@@ -138,6 +138,31 @@ RSpec.describe MockRedisLuaExtension, '::' do
         expect(@redis.get('string_result')).to eq('was unchanged')
         expect(@redis.get('number_result')).to eq('was unchanged')
       end
+
+      # BUG - MockRedis erronously returns true for @redis.hset('myhash', 'existing_key', 'second')
+      # TODO - Uncomment this once MockRedis is fixed
+      # it 'should convert true to 1 and false to 0' do
+      #   expect(@redis.hset('myhash', 'existing_key', 'first')).to eq(true)
+      #   expect(@redis.hset('myhash', 'existing_key', 'second')).to eq(false)
+      #   lua_script = %q|
+      #     local value = redis.call('hset', 'myhash', 'new_key', 'value')
+      #     if value == 1 then
+      #       redis.call('set', 'true_value', 'was 1')
+      #     else
+      #       redis.call('set', 'true_value', 'was not 1')
+      #     end
+      #
+      #     value = redis.call('hset', 'myhash', 'existing_key', 'third')
+      #     if value == 0 then
+      #       redis.call('set', 'false_value', 'was 0')
+      #     else
+      #       redis.call('set', 'false_value', 'was not 0')
+      #     end
+      #   |.strip
+      #   @redis.eval(lua_script)
+      #   expect(@redis.get('true_value')).to eq(1)
+      #   expect(@redis.get('false_value')).to eq(0)
+      # end
     end
   end
 end

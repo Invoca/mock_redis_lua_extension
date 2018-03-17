@@ -80,6 +80,8 @@ module MockRedisLuaExtension
     case arg
     when nil
       false
+    when true, false
+      nil
     when Integer, String
       arg
     else
