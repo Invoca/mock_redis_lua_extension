@@ -63,7 +63,9 @@ RSpec.describe MockRedisLuaExtension, '::' do
         lua_script = %q|
           redis.call('set', 'foo', {'a', 'b', 'c'})
         |.strip
-        expect { @redis.eval(lua_script) }.to raise_error(MockRedisLuaExtension::InvalidDataType)
+        expect { @redis.eval(lua_script) }.to raise_error(MockRedisLuaExtension::InvalidCommand) do |ex|
+          expect(ex.message).to match('caused by MockRedisLuaExtension::InvalidDataType')
+        end
       end
     end
 

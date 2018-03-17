@@ -42,6 +42,8 @@ module MockRedisLuaExtension
     else
       raise InvalidCommand, "Invalid command (cmd: #{cmd}, args: #{args.inspect})"
     end
+  rescue InvalidDataType => ex
+    raise InvalidCommand, "Invalid command (cmd: #{cmd}, args: #{args.inspect}) caused by #{ex.class}(#{ex.message})"
   end
 
   def setup_keys_and_argv(lua_state, keys, argv, args)
