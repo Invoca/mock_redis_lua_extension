@@ -28,7 +28,7 @@ module MockRedisLuaExtension
   end
 
   def mock_redis_lua_extension_enabled
-    true
+    RUFUS_LUA_LOADED
   end
 
   def eval(script, keys=nil, argv=nil, **args)
