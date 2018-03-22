@@ -1,4 +1,10 @@
-require 'rufus-lua'
+begin
+  require 'rufus-lua'
+  RUFUS_LUA_LOADED = true
+rescue StandardError => ex
+  RUFUS_LUA_LOADED = false
+  STDERR.puts "Failed to load rufus-lua: Exception was #{ex.inspect}"
+end
 
 module MockRedisLuaExtension
   class InvalidCommand < StandardError; end
@@ -7,7 +13,9 @@ module MockRedisLuaExtension
   def self.wrap(instance)
     if !instance.respond_to?(:mock_redis_lua_extension_enabled) && is_a_mock?(instance)
       class << instance
-        prepend(MockRedisLuaExtension)
+        if RUFUS_LUA_LOADED
+          prepend(MockRedisLuaExtension)
+        end
       end
     elsif !is_a_mock?(instance)
       raise ArgumentError, 'Can only wrap MockRedis instances'
