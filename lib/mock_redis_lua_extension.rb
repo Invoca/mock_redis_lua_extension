@@ -6,6 +6,8 @@ rescue StandardError => ex
   STDERR.puts "Failed to load rufus-lua: Exception was #{ex.inspect}"
 end
 
+require 'mock_redis_lua_extension/methods'
+
 module MockRedisLuaExtension
   class InvalidCommand < StandardError; end
   class InvalidDataType < StandardError; end
@@ -39,6 +41,14 @@ module MockRedisLuaExtension
       lua_bound_redis_call(cmd, *args)
     end
     marshal_lua_return_to_ruby(lua_state.eval(script))
+  end
+
+  def script(subcommand, *args)
+    Methods::Script.new.call(subcommand, *args)
+  end
+
+  def evalsha(sha, *args)
+    Methods::Evalsha.new(self).call(sha, *args)
   end
 
   private

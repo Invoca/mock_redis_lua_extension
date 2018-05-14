@@ -162,5 +162,48 @@ RSpec.describe MockRedisLuaExtension, '::' do
       #   expect(redis.get('false_value')).to eq(0)
       # end
     end
+
+    describe 'script' do
+      context 'passing load subcommand' do
+        let(:script) { 'return 1' }
+        let(:script_sha) { Digest::SHA1.hexdigest(script) }
+
+        it 'returns sha of script and stores it in registry' do
+          sha = redis.script(:load, script)
+          expect(sha).to be == script_sha
+          loaded_script = described_class::Registry.instance.scripts[script_sha]
+          expect(loaded_script).to be == script
+        end
+      end
+
+      context 'passing not supported subcommand' do
+        it 'raises InvalidCommand exception' do
+          expect { redis.script(:not_existin_subcommand) }
+            .to raise_error described_class::InvalidCommand
+        end
+      end
+    end
+
+    describe 'evalsha' do
+      let(:script) do
+        <<-LUA
+        local value = redis.call('get', KEYS[1])
+        if value ~= nil then
+          redis.call('del', KEYS[1])
+          return value
+        else
+          return nil
+        end
+        LUA
+      end
+      let(:sha) { redis.script(:load, script) }
+
+      before { redis.set('key', 'secret') }
+
+      it 'executes script and returns expected value' do
+        expect(redis.evalsha(sha, keys: ['key'])).to be == 'secret'
+        expect(redis.exists('key')).to be == false
+      end
+    end
   end
 end
