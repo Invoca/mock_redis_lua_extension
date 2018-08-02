@@ -2,6 +2,8 @@ require 'spec_helper'
 require 'mock_redis_lua_extension'
 require 'mock_redis'
 
+require 'pry'
+
 RSpec.describe MockRedisLuaExtension, '::' do
   before do
     @redis = MockRedisLuaExtension.wrap(MockRedis.new)
@@ -91,7 +93,7 @@ RSpec.describe MockRedisLuaExtension, '::' do
       end
 
       it 'should return redis success responses as "OK"' do
-        lua_script=%q|
+        lua_script = %q|
           return redis.call('set', 'foo', 'bar')
         |.strip
         expect(@redis.eval(lua_script)).to eq('OK')
@@ -99,6 +101,30 @@ RSpec.describe MockRedisLuaExtension, '::' do
 
       it 'should correctly marshall nested tables' do
         expect(@redis.eval(%q| return {foo='bar', 'a', 1.4, {'b', 2.7}} |)).to eq(['a', 1, ['b', 2]])
+      end
+    end
+
+    context 'cjson implementation' do
+      it 'should decode json strings' do
+        lua_script = %q|
+         local result = cjson.decode('{"foo":"bar","baz":4,"nil_value":null}')
+         return { result.foo, result.baz, result.nil_value }
+        |.strip
+        expect(@redis.eval(lua_script)).to eq(['bar', 4])
+      end
+
+      it 'should encode hash-style tables' do
+        lua_script = %q|
+          return cjson.encode({ foo='bar', baz=4, null_value=nil })
+        |.strip
+        expect(@redis.eval(lua_script)).to eq('{"baz":4.0,"foo":"bar"}')
+      end
+
+      it 'should encode array-style tables' do
+        lua_script = %q|
+          return cjson.encode({ 'bar', 4, nil })
+        |.strip
+        expect(@redis.eval(lua_script)).to eq('["bar",4.0]')
       end
     end
 

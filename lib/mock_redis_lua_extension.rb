@@ -6,6 +6,8 @@ rescue StandardError => ex
   STDERR.puts "Failed to load rufus-lua: Exception was #{ex.inspect}"
 end
 
+require 'json'
+
 module MockRedisLuaExtension
   class InvalidCommand < StandardError; end
   class InvalidDataType < StandardError; end
@@ -38,6 +40,14 @@ module MockRedisLuaExtension
     lua_state.function 'redis.call' do |cmd, *args|
       lua_bound_redis_call(cmd, *args)
     end
+
+    lua_state.function 'cjson.decode' do |arg|
+      lua_bound_cjson_decode(arg)
+    end
+
+    lua_state.function 'cjson.encode' do |arg|
+      lua_bound_cjson_encode(arg)
+    end
     marshal_lua_return_to_ruby(lua_state.eval(script))
   end
 
@@ -52,6 +62,14 @@ module MockRedisLuaExtension
     end
   rescue InvalidDataType => ex
     raise InvalidCommand, "Invalid command (cmd: #{cmd}, args: #{args.inspect}) caused by #{ex.class}(#{ex.message})"
+  end
+
+  def lua_bound_cjson_decode(arg)
+    JSON.parse(arg)
+  end
+
+  def lua_bound_cjson_encode(arg)
+    table_to_array_or_hash(arg).to_json
   end
 
   def setup_keys_and_argv(lua_state, keys, argv, args)
@@ -118,6 +136,14 @@ module MockRedisLuaExtension
     (1..table.keys.length).map do |i|
       marshal_lua_return_to_ruby(table[i.to_f])
     end.compact
+  end
+
+  def table_to_array_or_hash(table)
+    if table.keys.all? { |k| k.is_a?(Numeric) && k >=0 }
+      table.to_a
+    else
+      table.to_h
+    end
   end
 
   def valid_lua_bound_cmds
