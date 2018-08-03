@@ -7,6 +7,7 @@ rescue StandardError => ex
 end
 
 require 'json'
+require 'digest'
 
 module MockRedisLuaExtension
   class InvalidCommand < StandardError; end
@@ -33,6 +34,37 @@ module MockRedisLuaExtension
     RUFUS_LUA_LOADED
   end
 
+  def script(subcmd, *args)
+    case subcmd.downcase.to_sym
+    when :load
+      args.count == 1 or raise ArgumentError, "Invalid args: #{args.inspect}"
+      script = args.first
+      Digest::SHA256.hexdigest(script).tap do |sha|
+        script_catalog[sha] = script
+      end
+    when :flush
+      @script_catalog = {}
+      true
+    when :exists
+      args = args.first
+      if args.is_a?(Array)
+        args.map { |sha| script_catalog.include?(sha) }
+      else
+        script_catalog.include?(args)
+      end
+    else
+      raise ArgumentError, "Invalid script command: #{subcmd}"
+    end
+  end
+
+  def evalsha(sha, keys=nil, argv=nil, **args)
+    if script(:exists, sha)
+      eval(script_catalog[sha], keys, argv, **args)
+    else
+      raise ArgumentError, "NOSCRIPT No matching script. Please use EVAL."
+    end
+  end
+
   def eval(script, keys=nil, argv=nil, **args)
     lua_state = Rufus::Lua::State.new
     setup_keys_and_argv(lua_state, keys, argv, args)
@@ -52,6 +84,10 @@ module MockRedisLuaExtension
   end
 
   private
+
+  def script_catalog
+    @script_catalog ||= {}
+  end
 
   def lua_bound_redis_call(cmd, *args)
     cmd = cmd.downcase
