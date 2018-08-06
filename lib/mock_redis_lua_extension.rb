@@ -153,6 +153,8 @@ module MockRedisLuaExtension
       nil
     when Integer, String, Array
       arg
+    when Float
+      arg.to_s
     else
       raise InvalidDataType, "Unsupported type returned from redis (was: #{arg.inspect})"
     end

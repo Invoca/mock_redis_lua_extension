@@ -226,6 +226,18 @@ RSpec.describe MockRedisLuaExtension, '::' do
         expect(redis.get('number_result')).to eq('was unchanged')
       end
 
+      it 'should return scores as strings' do
+        redis.zadd('myset', 1, 'one')
+        redis.zadd('myset', 2, 'two')
+        redis.zadd('myset', 3, 'three')
+        lua_script = %q|
+          local result = redis.call('zscore', 'myset', 'two')
+          return result
+        |.strip
+
+        expect(redis.eval(lua_script)).to eq('2.0')
+      end
+
 
       # it 'should convert true to 1 and false to 0' do
       #   expect(redis.hset('myhash', 'existing_key', 'first')).to eq(true)
