@@ -165,6 +165,17 @@ RSpec.describe MockRedisLuaExtension, '::' do
         expect(redis.get('value')).to eq('was false')
       end
 
+      it 'should marshall arrays into tables' do
+        redis.zadd('myset', 1, 'one')
+        redis.zadd('myset', 2, 'two')
+        redis.zadd('myset', 3, 'three')
+        lua_script = %q|
+           local result = redis.call('zrangebyscore', 'myset', 2, 3)
+           return { result[1], result[2] }
+        |.strip
+        expect(redis.eval(lua_script)).to eq(['two', 'three'])
+      end
+
       it 'should leave strings and numbers as is' do
         redis.lpush('string_value', 'value')
         lua_script = %q|

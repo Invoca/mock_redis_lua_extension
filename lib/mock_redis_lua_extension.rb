@@ -144,7 +144,7 @@ module MockRedisLuaExtension
       false
     when true, false
       nil
-    when Integer, String
+    when Integer, String, Array
       arg
     else
       raise InvalidDataType, "Unsupported type returned from redis (was: #{arg.inspect})"
