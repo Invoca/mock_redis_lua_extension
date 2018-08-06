@@ -148,6 +148,34 @@ RSpec.describe MockRedisLuaExtension, '::' do
         |.strip
         expect(redis.eval(lua_script)).to eq('["bar",4.0]')
       end
+
+      it 'should encode strings' do
+        lua_script = %q|
+          return cjson.encode('in_service')
+        |.strip
+        expect(redis.eval(lua_script)).to eq('"in_service"')
+      end
+
+      it 'should encode nil' do
+        lua_script = %q|
+          return cjson.encode(nil)
+        |.strip
+        expect(redis.eval(lua_script)).to eq('null')
+      end
+
+      it 'should encode numbers' do
+        lua_script = %q|
+          return cjson.encode(4)
+        |.strip
+        expect(redis.eval(lua_script)).to eq('4.0')
+      end
+
+      it 'should encode floats' do
+        lua_script = %q|
+          return cjson.encode(4.2)
+        |.strip
+        expect(redis.eval(lua_script)).to eq('4.2')
+      end
     end
 
     context 'marshalling redis.call return values to lua' do

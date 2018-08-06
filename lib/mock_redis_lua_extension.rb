@@ -105,7 +105,14 @@ module MockRedisLuaExtension
   end
 
   def lua_bound_cjson_encode(arg)
-    table_to_array_or_hash(arg).to_json
+    case arg
+    when String, Float, Integer, NilClass
+      arg.to_json
+    when Rufus::Lua::Table
+      table_to_array_or_hash(arg).to_json
+    else
+      raise InvalidDataType, "Unexpected data type for cjson.encode: #{arg.inspect}"
+    end
   end
 
   def setup_keys_and_argv(lua_state, keys, argv, args)
@@ -133,7 +140,7 @@ module MockRedisLuaExtension
         when String
           arg
         else
-          raise InvalidDataType, "Lua redis() command arguments must be strings or integers (was: #{args.inspect})"
+          raise InvalidDataType, "Lua redis() command arguments must be strings or numbers (was: #{args.inspect})"
       end
     end
   end
