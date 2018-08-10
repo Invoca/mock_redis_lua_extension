@@ -145,18 +145,20 @@ module MockRedisLuaExtension
     end
   end
 
-  def marshal_redis_result_to_lua(arg)
-    case arg
+  def marshal_redis_result_to_lua(result)
+    case result
     when nil
       false
-    when true, false
-      nil
+    when true
+      1
+    when false
+      0
     when Integer, String, Array
-      arg
+      result
     when Float
-      arg.to_s
+      result.to_s
     else
-      raise InvalidDataType, "Unsupported type returned from redis (was: #{arg.inspect})"
+      raise InvalidDataType, "Unsupported type returned from redis (was: #{result.inspect})"
     end
   end
 
