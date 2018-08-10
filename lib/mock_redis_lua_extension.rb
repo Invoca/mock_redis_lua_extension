@@ -127,22 +127,57 @@ module MockRedisLuaExtension
   end
 
   def redis_call_from_lua(cmd, *args)
-    redis_args = marshal_lua_args_to_redis(args)
+    redis_args = marshal_lua_args_to_redis(cmd, args)
     redis_result = self.send(cmd, *redis_args)
     marshal_redis_result_to_lua(redis_result)
   end
 
-  def marshal_lua_args_to_redis(args)
-    args.map do |arg|
+  def marshal_lua_args_to_redis(cmd, args)
+    options, args = parse_options(cmd, args)
+    converted_args = args.map do |arg|
       case arg
-        when Float, Integer
-          arg.to_s
-        when String
-          arg
-        else
-          raise InvalidDataType, "Lua redis() command arguments must be strings or numbers (was: #{args.inspect})"
+      when Float, Integer
+        arg.to_s
+      when String
+        arg
+      else
+        raise InvalidDataType, "Lua redis() command arguments must be strings or numbers (was: #{args.inspect})"
       end
     end
+    if options.any? { |_, v| v }
+      converted_args + [options]
+    else
+      converted_args
+    end
+  end
+
+  def parse_options(cmd, args)
+    limit_cmds = [
+      'zrangebyscore',
+      'zrangebylex',
+      'zrevrangebyscore',
+      'zrevrangebylex'
+    ]
+
+    scores_cmds = [
+      'zrange',
+      'zrangebyscore',
+      'zrevrangebyscore'
+    ]
+
+    limit, args = if args[-3].to_s.downcase == 'limit' && limit_cmds.include?(cmd)
+             [args[-2..-1], args[0...-3]]
+           else
+             [nil, args]
+           end
+
+    withscores, args = if args[-1].to_s.downcase == 'withscores' && scores_cmds.include?(cmd)
+                         [true, args[0...-1]]
+                       else
+                         [nil, args]
+                       end
+
+    return { limit: limit, with_scores: withscores }, args
   end
 
   def marshal_redis_result_to_lua(result)

@@ -91,6 +91,37 @@ RSpec.describe MockRedisLuaExtension, '::' do
           expect(ex.message).to match('caused by MockRedisLuaExtension::InvalidDataType')
         end
       end
+
+      context 'hash options' do
+        before do
+          redis.zadd('foo', 1, 'washington')
+          redis.zadd('foo', 2, 'jefferson')
+          redis.zadd('foo', 3, 'adams')
+        end
+
+        it 'should convert limits into a hash option' do
+          lua_script = %q|
+           return redis.call('ZRANGEBYSCORE', 'foo', 2, 3, 'LIMIT', 0, 1)
+          |.strip
+          expect(redis.eval(lua_script)).to eq(['jefferson'])
+        end
+
+        it 'should convert withscores into a hash option' do
+          lua_script = %q|
+           return redis.call('ZRANGEBYSCORE', 'foo', 2, 3, 'WITHSCORES')
+          |.strip
+          expected_result = [['jefferson', 2.0], ['adams', 3.0]]
+          expect(redis.eval(lua_script)).to eq(expected_result)
+        end
+
+        it 'should support both hash options' do
+          lua_script = %q|
+           return redis.call('ZRANGEBYSCORE', 'foo', 2, 3, 'WITHSCORES', 'LIMIT', 1, 1)
+          |.strip
+          expected_result = [['adams', 3.0]]
+          expect(redis.eval(lua_script)).to eq(expected_result)
+        end
+      end
     end
 
     context 'marshalling lua return values to ruby' do
