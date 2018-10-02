@@ -13,6 +13,19 @@ module MockRedisLuaExtension
   class InvalidCommand < StandardError; end
   class InvalidDataType < StandardError; end
 
+  LIMIT_CMDS = [
+    'zrangebyscore',
+    'zrangebylex',
+    'zrevrangebyscore',
+    'zrevrangebylex'
+  ].freeze
+
+  WITHSCORES_CMDS = [
+    'zrange',
+    'zrangebyscore',
+    'zrevrangebyscore'
+  ].freeze
+
   def self.wrap(instance)
     if !instance.respond_to?(:mock_redis_lua_extension_enabled) && is_a_mock?(instance)
       class << instance
@@ -152,26 +165,13 @@ module MockRedisLuaExtension
   end
 
   def parse_options(cmd, args)
-    limit_cmds = [
-      'zrangebyscore',
-      'zrangebylex',
-      'zrevrangebyscore',
-      'zrevrangebylex'
-    ]
-
-    scores_cmds = [
-      'zrange',
-      'zrangebyscore',
-      'zrevrangebyscore'
-    ]
-
-    limit, args = if args[-3].to_s.downcase == 'limit' && limit_cmds.include?(cmd)
+    limit, args = if args[-3].to_s.downcase == 'limit' && LIMIT_CMDS.include?(cmd)
              [args[-2..-1], args[0...-3]]
            else
              [nil, args]
            end
 
-    withscores, args = if args[-1].to_s.downcase == 'withscores' && scores_cmds.include?(cmd)
+    withscores, args = if args[-1].to_s.downcase == 'withscores' && WITHSCORES_CMDS.include?(cmd)
                          [true, args[0...-1]]
                        else
                          [nil, args]
@@ -180,7 +180,7 @@ module MockRedisLuaExtension
     return { limit: limit, with_scores: withscores }, args
   end
 
-  def marshal_redis_result_to_lua(result)
+  def marshal_redis_result_to_lua(result, **options)
     case result
     when nil
       false
@@ -188,7 +188,9 @@ module MockRedisLuaExtension
       1
     when false
       0
-    when Integer, String, Array
+    when Array
+      options[:flatten_array] ? result.flatten : result
+    when Integer, String
       result
     when Float
       result.to_s

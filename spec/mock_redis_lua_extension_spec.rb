@@ -97,28 +97,29 @@ RSpec.describe MockRedisLuaExtension, '::' do
           redis.zadd('foo', 1, 'washington')
           redis.zadd('foo', 2, 'jefferson')
           redis.zadd('foo', 3, 'adams')
+          redis.zadd('foo', 4, 'madison')
         end
 
         it 'should convert limits into a hash option' do
           lua_script = %q|
-           return redis.call('ZRANGEBYSCORE', 'foo', 2, 3, 'LIMIT', 0, 1)
+           return redis.call('ZRANGEBYSCORE', 'foo', 2, 4, 'LIMIT', 0, 2)
           |.strip
-          expect(redis.eval(lua_script)).to eq(['jefferson'])
+          expect(redis.eval(lua_script)).to eq(['jefferson', 'adams'])
         end
 
         it 'should convert withscores into a hash option' do
           lua_script = %q|
            return redis.call('ZRANGEBYSCORE', 'foo', 2, 3, 'WITHSCORES')
           |.strip
-          expected_result = [['jefferson', 2.0], ['adams', 3.0]]
+          expected_result = ['jefferson', 2.0, 'adams', 3.0]
           expect(redis.eval(lua_script)).to eq(expected_result)
         end
 
         it 'should support both hash options' do
           lua_script = %q|
-           return redis.call('ZRANGEBYSCORE', 'foo', 2, 3, 'WITHSCORES', 'LIMIT', 1, 1)
+           return redis.call('ZRANGEBYSCORE', 'foo', 2, 4, 'WITHSCORES', 'LIMIT', 1, 2)
           |.strip
-          expected_result = [['adams', 3.0]]
+          expected_result = ['adams', 3.0, 'madison', 4.0]
           expect(redis.eval(lua_script)).to eq(expected_result)
         end
       end
