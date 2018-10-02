@@ -86,6 +86,16 @@ module MockRedisLuaExtension
       lua_bound_redis_call(cmd, *args)
     end
 
+    lua_state.function 'redis.breakpoint' do
+      # Use redis commands such as `self.hgetall("key")` to debug
+      binding.pry
+    end
+
+    lua_state.function 'redis.debug' do |*args|
+      parsed_args = args.map { |arg| arg.is_a?(Rufus::Lua::Table) ? arg.to_ruby : arg }
+      puts parsed_args.map(&:to_s).join(", ")
+    end
+
     lua_state.function 'cjson.decode' do |arg|
       lua_bound_cjson_decode(arg)
     end
@@ -142,7 +152,7 @@ module MockRedisLuaExtension
   def redis_call_from_lua(cmd, *args)
     redis_args = marshal_lua_args_to_redis(cmd, args)
     redis_result = self.send(cmd, *redis_args)
-    marshal_redis_result_to_lua(redis_result)
+    marshal_redis_result_to_lua(redis_result, flatten_array: WITHSCORES_CMDS.include?(cmd.downcase))
   end
 
   def marshal_lua_args_to_redis(cmd, args)

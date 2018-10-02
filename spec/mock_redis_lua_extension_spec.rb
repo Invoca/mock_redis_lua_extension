@@ -294,5 +294,31 @@ RSpec.describe MockRedisLuaExtension, '::' do
          expect(redis.get('false_value')).to eq('was 0')
       end
     end
+
+    context "redis.breakpoint" do
+      it 'calls binding.pry when redis.breakpoint() is called' do
+        expect_any_instance_of(Binding).to receive(:pry)
+        redis.eval("redis.breakpoint()")
+      end
+
+      it 'puts parsed args when redis.debug() is called' do
+        expect_any_instance_of(MockRedis).to receive(:puts).with("hello, hi, 1.0, [5.0, 10.0], {\"monkey\"=>\"banana\", \"number\"=>200.0}, goodbye")
+        lua_script = %q|
+          local var1 = "hi"
+          local var2 = 1.0
+
+          local my_array = {}
+          table.insert(my_array, 5)
+          table.insert(my_array, 10)
+
+          local my_hash = {}
+          my_hash["monkey"] = "banana"
+          my_hash["number"] = 200
+
+          redis.debug("hello", var1, var2, my_array, my_hash, "goodbye")
+        |.strip
+        redis.eval(lua_script)
+      end
+    end
   end
 end
