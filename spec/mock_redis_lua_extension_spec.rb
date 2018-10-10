@@ -97,28 +97,29 @@ RSpec.describe MockRedisLuaExtension, '::' do
           redis.zadd('foo', 1, 'washington')
           redis.zadd('foo', 2, 'jefferson')
           redis.zadd('foo', 3, 'adams')
+          redis.zadd('foo', 4, 'madison')
         end
 
         it 'should convert limits into a hash option' do
           lua_script = %q|
-           return redis.call('ZRANGEBYSCORE', 'foo', 2, 3, 'LIMIT', 0, 1)
+           return redis.call('ZRANGEBYSCORE', 'foo', 2, 4, 'LIMIT', 0, 2)
           |.strip
-          expect(redis.eval(lua_script)).to eq(['jefferson'])
+          expect(redis.eval(lua_script)).to eq(['jefferson', 'adams'])
         end
 
         it 'should convert withscores into a hash option' do
           lua_script = %q|
            return redis.call('ZRANGEBYSCORE', 'foo', 2, 3, 'WITHSCORES')
           |.strip
-          expected_result = [['jefferson', 2.0], ['adams', 3.0]]
+          expected_result = ['jefferson', 2.0, 'adams', 3.0]
           expect(redis.eval(lua_script)).to eq(expected_result)
         end
 
         it 'should support both hash options' do
           lua_script = %q|
-           return redis.call('ZRANGEBYSCORE', 'foo', 2, 3, 'WITHSCORES', 'LIMIT', 1, 1)
+           return redis.call('ZRANGEBYSCORE', 'foo', 2, 4, 'WITHSCORES', 'LIMIT', 1, 2)
           |.strip
-          expected_result = [['adams', 3.0]]
+          expected_result = ['adams', 3.0, 'madison', 4.0]
           expect(redis.eval(lua_script)).to eq(expected_result)
         end
       end
@@ -291,6 +292,32 @@ RSpec.describe MockRedisLuaExtension, '::' do
          redis.eval(lua_script)
          expect(redis.get('true_value')).to eq('was 1')
          expect(redis.get('false_value')).to eq('was 0')
+      end
+    end
+
+    context "redis.breakpoint" do
+      it 'calls binding.pry when redis.breakpoint() is called' do
+        expect_any_instance_of(Binding).to receive(:pry)
+        redis.eval("redis.breakpoint()")
+      end
+
+      it 'puts parsed args when redis.debug() is called' do
+        expect_any_instance_of(MockRedis).to receive(:puts).with("hello, hi, 1.0, [5.0, 10.0], {\"monkey\"=>\"banana\", \"number\"=>200.0}, goodbye")
+        lua_script = %q|
+          local var1 = "hi"
+          local var2 = 1.0
+
+          local my_array = {}
+          table.insert(my_array, 5)
+          table.insert(my_array, 10)
+
+          local my_hash = {}
+          my_hash["monkey"] = "banana"
+          my_hash["number"] = 200
+
+          redis.debug("hello", var1, var2, my_array, my_hash, "goodbye")
+        |.strip
+        redis.eval(lua_script)
       end
     end
   end
