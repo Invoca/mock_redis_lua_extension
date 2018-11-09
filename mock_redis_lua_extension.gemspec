@@ -17,7 +17,4 @@ Gem::Specification.new do |s|
 
   s.add_dependency 'mock_redis'
   s.add_dependency 'rufus-lua'
-  s.add_development_dependency 'rake', '>= 10', '< 12'
-  s.add_development_dependency 'rspec', '~> 3.0'
-  s.add_development_dependency 'pry'
 end
