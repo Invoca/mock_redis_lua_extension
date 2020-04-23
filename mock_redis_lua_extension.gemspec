@@ -11,6 +11,10 @@ Gem::Specification.new do |s|
   s.homepage    = "https://github.com/Invoca/mock_redis_lua_extension"
   s.summary     = "Extension to mock_redis enabling lua execution via rufus-lua"
 
+  s.metadata = {
+      'allowed_push_host' => 'https://rubygems.org'
+  }
+
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- spec/*`.split("\n")
   s.require_paths = ['lib']
