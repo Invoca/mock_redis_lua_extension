@@ -1,4 +1,6 @@
 #!/usr/bin/env rake
+require 'bundler/gem_tasks'
+
 begin
   require 'bundler/setup'
 rescue LoadError
