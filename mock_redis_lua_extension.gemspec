@@ -1,11 +1,11 @@
 $LOAD_PATH.push File.expand_path("../lib", __FILE__)
 
-require "mock_redis_lua_extension2/version"
+require "mock_redis_lua_extension/version"
 
 # Describe your gem and declare its dependencies:
 Gem::Specification.new do |s|
   s.name        = "mock_redis_lua_extension2"
-  s.version     = MockRedisLuaExtension2::VERSION
+  s.version     = MockRedisLuaExtension::VERSION
   s.authors     = ["Invoca Development"]
   s.email       = ["development@invoca.com"]
   s.homepage    = "https://github.com/Invoca/mock_redis_lua_extension2"

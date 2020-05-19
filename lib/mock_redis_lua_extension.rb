@@ -9,7 +9,7 @@ end
 require 'json'
 require 'digest'
 
-module MockRedisLuaExtension2
+module MockRedisLuaExtension
   class InvalidCommand < StandardError; end
   class InvalidDataType < StandardError; end
 
@@ -27,10 +27,10 @@ module MockRedisLuaExtension2
   ].freeze
 
   def self.wrap(instance)
-    if !instance.respond_to?(:mock_redis_lua_extension2_enabled) && is_a_mock?(instance)
+    if !instance.respond_to?(:mock_redis_lua_extension_enabled) && is_a_mock?(instance)
       class << instance
         if RUFUS_LUA_LOADED
-          prepend(MockRedisLuaExtension2)
+          prepend(MockRedisLuaExtension)
         end
       end
     elsif !is_a_mock?(instance)
@@ -43,7 +43,7 @@ module MockRedisLuaExtension2
     instance.class.ancestors.any? { |a| a.to_s == 'MockRedis' }
   end
 
-  def mock_redis_lua_extension2_enabled
+  def mock_redis_lua_extension_enabled
     RUFUS_LUA_LOADED
   end
 

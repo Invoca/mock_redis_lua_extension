@@ -1,20 +1,20 @@
 require 'spec_helper'
-require 'mock_redis_lua_extension2'
+require 'mock_redis_lua_extension'
 require 'mock_redis'
 
 require 'pry'
 
-RSpec.describe MockRedisLuaExtension2, '::' do
+RSpec.describe MockRedisLuaExtension, '::' do
 
-  let(:redis) { MockRedisLuaExtension2.wrap(MockRedis.new) }
+  let(:redis) { MockRedisLuaExtension.wrap(MockRedis.new) }
 
   context 'extending a MockRedis instance' do
     it 'should add a method indicating that the MockRedis has been extended' do
-      expect(redis.respond_to?(:mock_redis_lua_extension2_enabled)).to eq(true)
+      expect(redis.respond_to?(:mock_redis_lua_extension_enabled)).to eq(true)
     end
 
     it 'should raise an ArgumentError when attempting to wrap an object that is not a MockRedis' do
-      expect { MockRedisLuaExtension2.wrap(Object.new) }.to raise_error(ArgumentError,
+      expect { MockRedisLuaExtension.wrap(Object.new) }.to raise_error(ArgumentError,
                                                                        'Can only wrap MockRedis instances')
     end
 
@@ -87,8 +87,8 @@ RSpec.describe MockRedisLuaExtension2, '::' do
         lua_script = %q|
           redis.call('set', 'foo', {'a', 'b', 'c'})
         |.strip
-        expect { redis.eval(lua_script) }.to raise_error(MockRedisLuaExtension2::InvalidCommand) do |ex|
-          expect(ex.message).to match('caused by MockRedisLuaExtension2::InvalidDataType')
+        expect { redis.eval(lua_script) }.to raise_error(MockRedisLuaExtension::InvalidCommand) do |ex|
+          expect(ex.message).to match('caused by MockRedisLuaExtension::InvalidDataType')
         end
       end
 
