@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    mock_redis_lua_extension2 (0.1.0.pre.3)
+    mock_redis_lua_extension2 (0.1.0.pre.4)
       mock_redis
       rufus-lua
 
