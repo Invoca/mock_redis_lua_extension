@@ -1,9 +1,9 @@
-source 'http://rubygems.org'
+source 'https://rubygems.org'
 
 gemspec
 
 group :development do
   gem 'pry'
-  gem 'rake',  '~> 11.0'
-  gem 'rspec', '~> 3.0'
+  gem 'rake'
+  gem 'rspec'
 end
