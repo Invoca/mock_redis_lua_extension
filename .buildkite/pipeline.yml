@@ -1,0 +1,28 @@
+RUBY_VERSION: &RUBY_VERSION 2.6.5
+
+unit_test_common: &unit_test_common
+  timeout_in_minutes: 5
+  agents:
+    queue: ruby
+    ruby: *RUBY_VERSION
+  commands:
+  - bundle install
+  - bundle exec rake
+
+steps:
+- label: ":rspec: Rails 4"
+  env:
+    BUNDLE_GEMFILE: gemfiles/rails_4.gemfile
+  <<: *unit_test_common
+- label: ":rspec: Rails 5"
+  env:
+    BUNDLE_GEMFILE: gemfiles/rails_5.gemfile
+  <<: *unit_test_common
+- label: ":rspec: Rails 6"
+  env:
+    BUNDLE_GEMFILE: gemfiles/rails_6.gemfile
+  <<: *unit_test_common
+- label: ":rspec: Rails Current"
+  env:
+    BUNDLE_GEMFILE: Gemfile
+  <<: *unit_test_common
