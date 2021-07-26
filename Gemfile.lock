@@ -43,6 +43,7 @@ PLATFORMS
 
 DEPENDENCIES
   appraisal
+  mock_redis (= 0.23.0)
   mock_redis_lua_extension2!
   pry
   rake
