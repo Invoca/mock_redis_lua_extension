@@ -6,6 +6,7 @@ unit_test_common: &unit_test_common
     queue: ruby
     ruby: *RUBY_VERSION
   commands:
+  - apt-get install liblua5.1-0
   - bundle install
   - bundle exec rake
 
