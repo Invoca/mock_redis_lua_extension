@@ -269,30 +269,6 @@ RSpec.describe MockRedisLuaExtension, '::' do
 
         expect(redis.eval(lua_script)).to eq('2.0')
       end
-
-
-      it 'should convert true to 1 and false to 0 when returning from redis' do
-        expect(redis.hset('myhash', 'existing_key', 'first')).to eq(true)
-        expect(redis.hset('myhash', 'existing_key', 'second')).to eq(false)
-        lua_script = %q|
-           local value = redis.call('hset', 'myhash', 'new_key', 'value')
-           if value == 1 then
-             redis.call('set', 'true_value', 'was 1')
-           else
-             redis.call('set', 'true_value', 'was not 1')
-           end
-
-           value = redis.call('hset', 'myhash', 'existing_key', 'third')
-           if value == 0 then
-              redis.call('set', 'false_value', 'was 0')
-            else
-              redis.call('set', 'false_value', 'was not 0')
-            end
-         |.strip
-         redis.eval(lua_script)
-         expect(redis.get('true_value')).to eq('was 1')
-         expect(redis.get('false_value')).to eq('was 0')
-      end
     end
 
     context "redis.breakpoint" do
