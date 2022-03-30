@@ -7,5 +7,4 @@ group :development do
   gem 'pry'
   gem 'rake'
   gem 'rspec'
-  gem 'appraisal'
 end
