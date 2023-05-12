@@ -159,8 +159,12 @@ module MockRedisLuaExtension
     options, args = parse_options(cmd, args)
     converted_args = args.map do |arg|
       case arg
-      when Float, Integer
-        arg.to_s
+      when Float
+        # Rufus::Lua unfortunately converts plain integers into floats...
+        # So this is a hack to keep integers as integer strings without a trailing '.0'.
+        arg.to_i == arg ? arg.to_i.to_s : arg.to_s
+      when Integer
+        args.to_s
       when String
         arg
       else
