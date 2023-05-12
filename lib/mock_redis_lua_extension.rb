@@ -267,7 +267,7 @@ module MockRedisLuaExtension
         #String commands
         :append, :bitcount, :bitfield, :bitop, :bitpos, :decr, :decrby, :get, :getbit,
         :getrange, :getset, :incr, :incrby, :incrbyfloat, :mget, :mset, :msetnx, :psetex,
-        :set, :setbit, :setex, :setnx, :setrange, :strlen
+        :publish, :set, :setbit, :setex, :setnx, :setrange, :strlen
     ].map {|cmd| [cmd, true] }]
   end
 end
