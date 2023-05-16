@@ -9,4 +9,4 @@ Note: this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0
 - Lua Numbers without decimals will now be converted to integer strings.
 
 ### Added
-- Added `PUBLISH` to allowable function calls. 
+- Added `PUBLISH` to allowable function calls.
