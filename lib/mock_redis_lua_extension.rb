@@ -159,8 +159,10 @@ module MockRedisLuaExtension
     options, args = parse_options(cmd, args)
     converted_args = args.map do |arg|
       case arg
-      when Float, Integer
-        arg.to_s
+      when Float
+        ((arg.round - arg).abs < Float::EPSILON) ? arg.to_i.to_s : arg.to_s
+      when Integer
+        args.to_s
       when String
         arg
       else
@@ -267,7 +269,7 @@ module MockRedisLuaExtension
         #String commands
         :append, :bitcount, :bitfield, :bitop, :bitpos, :decr, :decrby, :get, :getbit,
         :getrange, :getset, :incr, :incrby, :incrbyfloat, :mget, :mset, :msetnx, :psetex,
-        :set, :setbit, :setex, :setnx, :setrange, :strlen
+        :publish, :set, :setbit, :setex, :setnx, :setrange, :strlen
     ].map {|cmd| [cmd, true] }]
   end
 end

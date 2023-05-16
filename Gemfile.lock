@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    mock_redis_lua_extension2 (0.1.0)
+    mock_redis_lua_extension2 (0.2.0)
       mock_redis
       rufus-lua
 
@@ -10,7 +10,7 @@ GEM
   specs:
     coderay (1.1.2)
     diff-lcs (1.3)
-    ffi (1.12.2)
+    ffi (1.15.5)
     method_source (1.0.0)
     mock_redis (0.28.0)
       ruby2_keywords

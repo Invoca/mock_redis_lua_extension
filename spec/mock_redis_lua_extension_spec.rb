@@ -83,6 +83,16 @@ RSpec.describe MockRedisLuaExtension, '::' do
         expect(redis.get('foo')).to eq('1.5')
       end
 
+      it 'converts lua numbers with decimals that are integers to integer strings' do
+        redis.eval(%q| redis.call('set', 'foo', 1.0) |)
+        expect(redis.get('foo')).to eq('1')
+      end
+
+      it "should not convert lua numbers without decimals to floats" do
+        redis.eval(%q| redis.call('set', 'foo', 1) |)
+        expect(redis.get('foo')).to eq('1')
+      end
+
       it 'should raise an error if args are not strings or numbers' do
         lua_script = %q|
           redis.call('set', 'foo', {'a', 'b', 'c'})
