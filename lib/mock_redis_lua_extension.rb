@@ -160,7 +160,7 @@ module MockRedisLuaExtension
     converted_args = args.map do |arg|
       case arg
       when Float
-        arg.to_i == arg ? arg.to_i.to_s : arg.to_s
+        ((arg.round - arg).abs < Float::EPSILON) ? arg.to_i.to_s : arg.to_s
       when Integer
         args.to_s
       when String
