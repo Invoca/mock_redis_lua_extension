@@ -52,7 +52,7 @@ module MockRedisLuaExtension
     when :load
       args.count == 1 or raise ArgumentError, "Invalid args: #{args.inspect}"
       script = args.first
-      Digest::SHA256.hexdigest(script).tap do |sha|
+      Digest::SHA1.hexdigest(script).tap do |sha|
         script_catalog[sha] = script
       end
     when :flush
