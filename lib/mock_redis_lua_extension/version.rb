@@ -1,3 +1,3 @@
 module MockRedisLuaExtension
-  VERSION = "0.3.pre.zh.0".freeze
+  VERSION = "0.3.0".freeze
 end
