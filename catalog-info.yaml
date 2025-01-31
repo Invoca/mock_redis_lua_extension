@@ -19,6 +19,7 @@ metadata:
   tags:
   - ruby
   - gem
+  - public
   annotations:
     buildkite.com/project-slug: invoca/mock-redis-lua-extension
     github.com/project-slug: invoca/mock_redis_lua_extension
