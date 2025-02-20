@@ -3,20 +3,7 @@ name: Pipeline
 on: [push]
 jobs:
   tests:
-    name: Unit Tests
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        ruby: [2.6, 2.7, '3.0', 3.1]
-    steps:
-    - uses: actions/checkout@v2
-    - uses: ruby/setup-ruby@v1
-      with:
-        ruby-version: ${{ matrix.ruby }}
-        bundler: 2.3.9
-        bundler-cache: true
-    - name: Unit tests
-      run: |
-        sudo apt-get install liblua5.1-0
-        bundle exec rake
+    uses: Invoca/ruby-test-matrix-workflow/.github/workflows/ruby-test-matrix.yml@main
+    with:
+      pre-test-hook: "sudo apt-get install liblua5.1-0"
+      test-command: "bundle exec rake"
