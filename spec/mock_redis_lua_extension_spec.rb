@@ -288,7 +288,8 @@ RSpec.describe MockRedisLuaExtension, '::' do
       end
 
       it 'puts parsed args when redis.debug() is called' do
-        expect_any_instance_of(MockRedis).to receive(:puts).with("hello, hi, 1.0, [5.0, 10.0], {\"monkey\"=>\"banana\", \"number\"=>200.0}, goodbye")
+        hash = { "monkey" => "banana", "number" => 200.0 }
+        expect_any_instance_of(MockRedis).to receive(:puts).with("hello, hi, 1.0, [5.0, 10.0], #{hash}, goodbye")
         lua_script = %q|
           local var1 = "hi"
           local var2 = 1.0
