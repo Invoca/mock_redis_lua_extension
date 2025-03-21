@@ -82,6 +82,8 @@ module MockRedisLuaExtension
     lua_state = Rufus::Lua::State.new
     setup_keys_and_argv(lua_state, keys, argv, args)
 
+    lua_state.eval('unpack = table.unpack')
+
     lua_state.function 'redis.call' do |cmd, *args|
       lua_bound_redis_call(cmd, *args)
     end

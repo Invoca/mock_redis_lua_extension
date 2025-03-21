@@ -75,6 +75,19 @@ RSpec.describe MockRedisLuaExtension, '::' do
         result = redis.eval('return KEYS[1]', keys: [:stuff])
         expect(result).to eq('stuff')
       end
+
+      it 'supports the unpack function, as equivalent to table.unpack' do
+        unpack_lua_script = '
+          local t = {1, 2, 3, 4, 5}
+          return {unpack(t, 2, 4)}
+        '.strip
+        table_unpack_lua_script = '
+          local t = {1, 2, 3, 4, 5}
+          return {table.unpack(t, 2, 4)}
+        '.strip
+        expect(redis.eval(unpack_lua_script)).to eq([2, 3, 4])
+        expect(redis.eval(table_unpack_lua_script)).to eq([2, 3, 4])
+      end
     end
 
     context 'marshalling lua args to redis.call' do
