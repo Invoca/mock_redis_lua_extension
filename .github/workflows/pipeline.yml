@@ -4,6 +4,7 @@ on: [push]
 jobs:
   tests:
     uses: Invoca/ruby-test-matrix-workflow/.github/workflows/ruby-test-matrix.yml@main
+    secrets: inherit
     with:
       pre-test-hook: "sudo apt-get install liblua5.1-0"
       test-command: "bundle exec rake"
