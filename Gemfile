@@ -7,4 +7,6 @@ group :development do
   gem 'pry'
   gem 'rake'
   gem 'rspec'
+  gem 'simplecov', '~> 0.22'
+  gem 'simplecov-lcov', '~> 0.8'
 end

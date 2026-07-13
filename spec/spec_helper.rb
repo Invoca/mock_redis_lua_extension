@@ -1,3 +1,5 @@
+require_relative "simplecov_helper"
+
 require 'pry'
 
 # See http://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
